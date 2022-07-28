@@ -31,7 +31,7 @@ i=0
 
 class EGM(object):
     
-    def __init__(self, port=6511):
+    def __init__(self, port=6510):
 
         self.socket=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(('',port))
@@ -231,10 +231,12 @@ def Vedio_Process():
 
 EGM1 = EGM()
 
-Current_Position = EGM1.receive_from_robot()
+Current_Position = EGM1.receive_from_robot()[1]
 
     
 if Current_Position is not None:
     print(Current_Position)
+    while True:
+        EGM1.send_to_robot_joint([0,0,0,0,0,0])
 else:
-    print("Communication Not Working")
+    print("Communication Not Working :",Current_Position)
