@@ -1,3 +1,4 @@
+from ast import While
 import errno
 import json
 import egm_pb2
@@ -31,7 +32,7 @@ i=0
 
 class EGM(object):
     
-    def __init__(self, port=6510):
+    def __init__(self, port=6511):
 
         self.socket=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(('',port))
@@ -68,14 +69,14 @@ class EGM(object):
         joint_angles=None
         rapid_running=False
         motors_on=False
-        global Robot_Position_Flag
+        Robot_Position_Flag = False
 
         if robot_message.HasField('feedBack'):
             if Robot_Position_Flag == False:
                 Robot_pos = robot_message.feedBack.cartesian.pos
                 Robot_Position_Flag = True
             Joints = robot_message.feedBack.joints.joints
-            print(robot_message.feedBack.joints.joints)
+            print(Joints)
         if robot_message.HasField('rapidExecState'):
             rapid_running = robot_message.rapidExecState.state == robot_message.rapidExecState.RAPID_RUNNING
         if robot_message.HasField('motorState'):
@@ -100,8 +101,9 @@ class EGM(object):
         planned=sensorMessage.planned
 
         if joint_angles is not None:
-            joint_angles2 = list(np.rad2deg(cartesian))
-            print(joint_angles2)
+            #joint_angles2 = list(np.rad2deg(joint_angles))
+            #print(joint_angles2)
+            planned.joints.joints[:] = [0.0,0.0,0.0,180,0.0,0.0]
             print(planned.joints.joints)
         buf2=sensorMessage.SerializeToString()
 
@@ -147,7 +149,7 @@ class EGM(object):
 ##############################################################################################
 
 
-def Vedio_Process():
+def Vedio_Process(rob_joints):
     while(cap.isOpened()):
         ret, frame = cap.read()
         if ret == False:
@@ -231,12 +233,14 @@ def Vedio_Process():
 
 EGM1 = EGM()
 
-Current_Position = EGM1.receive_from_robot()[1]
 
-    
-if Current_Position is not None:
-    print(Current_Position)
-    while True:
-        EGM1.send_to_robot_joint([0,0,0,0,0,0])
-else:
-    print("Communication Not Working :",Current_Position)
+while True:
+    Current_Position = EGM1.receive_from_robot()[1]
+    if Current_Position is not None:
+        while True:
+            #Current_Position = EGM1.receive_from_robot()[1]
+            #print(Current_Position)
+            EGM1.send_to_robot_joints(Current_Position)
+            time.sleep(.1)
+    else:
+        print("Waiting for robot to connect")
