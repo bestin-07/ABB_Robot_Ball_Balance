@@ -233,8 +233,8 @@ def Vedio_Process(rob_joints):
 
 EGM1 = EGM()
 
-
 while True:
+    
     Current_Position = EGM1.receive_from_robot()[1]
     if Current_Position is not None:
         while True:
