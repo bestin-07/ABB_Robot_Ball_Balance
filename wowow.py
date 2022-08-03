@@ -104,7 +104,7 @@ class EGM(object):
             #joint_angles2 = list(np.rad2deg(joint_angles))
             #print(joint_angles2)
             planned.joints.joints[:] = joint_angles
-            print(planned.joints.joints)
+            #print(planned.joints.joints)
         buf2=sensorMessage.SerializeToString()
 
         try:
@@ -197,14 +197,14 @@ while True:
                 circles =np.round(circles[0, :]).astype("int")
             circles[0][0]=circles[0][0]-300
             circles[0][1]=circles[0][1]-400
-            print(circles)
+            #print(circles)
             circles[0][0]=circles[0][0]+300
             circles[0][1]=circles[0][1]+400
             for (x, y, r) in circles:
                 cv2.circle(output, (x, y), r, (0, 255, 0), 2)
             if i>0:
                 t=float(1/fps)
-                print(t)
+                #print(t)
                 if(x<0):
                     x=(x+300)
                 elif(x>0):
@@ -214,7 +214,7 @@ while True:
                     y=y+400
                 elif(y>0):
                     y=y-400
-                print(x,y) 
+                #print(x,y) 
                 p=math.atan(y/x)
                 d= math.sqrt(x*x+y*y)
                 dx= d*(math.cos(p))
@@ -228,12 +228,14 @@ while True:
                 qx=(dx/400)*(sx/2)*45
                 qy=(dy/300)*(sy/2)*45
 
-                print(d,s,dx,dy,sx,sy,qx,qy)
+                #print(qx,qy)
+                #print("\n")
             i += 1
         
         #Current_Position = EGM1.receive_from_robot()[1]
         #print(Current_Position)
-        EGM1.send_to_robot_joints(Current_Position)
+        new_pos = [0.0,0.0,0.0,qx+90,90,0.0]
+        EGM1.send_to_robot_joints(new_pos)
         time.sleep(.1)    
         
         cap.release() 
